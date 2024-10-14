@@ -1,0 +1,123 @@
+{
+  "workflow_name": "Order Delivery Issue",
+  "tileids":[1,2,3,4,5,6],
+  "start_tile":1,
+  "tiles": [
+    {
+      "id": 1,
+      "name":"name1",
+      "description":"get the issue from the customer",
+      "type": "UserInteractionTile",
+      "configuration": {
+        "prompt": "What seems to be the issue with your order?",
+        "options": ["Order Delayed", "Wrong Items Delivered"],
+        "next_tile":2
+      }
+      
+    },
+    {
+      "id": 2,
+      "name":"name2",
+      "description":"To check the Customer Selection",
+      "type": "LogicBuilderTile",
+      "configuration": {
+        "condition": "True",
+        "true_tile": 3,
+        "false_tile": "Flow Jump to Wrong Items Resolution",
+        "fallback_action": "Escalate to Support Agent"
+      }
+    },
+    {
+      "id": 3,
+      "name":"name3",
+      "description":"Jumpt to Check order status",
+      "type": "FlowJumpTile",
+      "configuration": {
+        "jump_target": 4,
+        "fallback_action": "Escalate to Support Agent"
+      }
+    },
+    {
+      "id": 4,
+      "name":"name4",
+      "description":"Order Status check",
+      "type": "APICallTile",
+      "configuration": {
+        "api_url": "https://randomuser.me/api/",
+        "method": "GET",
+        "params": {
+          "order_id": "{{order_id}}"
+        },
+        "fallback_action": "Escalate to Support Agent",
+        "response_processing": "Check if Order is On Time",
+        "next_tile":5
+      }
+    },
+    {
+      "id": 5,
+      "name":"name5",
+      "description":"Check order on time",
+      "type": "LogicBuilderTile",
+      "configuration": {
+        "condition": "Order On Time",
+        "action_if_true": 7,
+        "action_if_false": 6,
+        "fallback_action": "Escalate to Support Agent"
+      }
+    },
+    {
+      "id": 6,
+      "name":"name6",
+      "description":"Initiate Refund Process",
+      "type": "APICallTile",
+      "configuration": {
+        "api_url": "https://jsonplaceholder.typicode.com/posts",
+        "method": "POST",
+        "params": {
+          "order_id": "{{order_id}}"
+        },
+        "response_processing": "Notify Customer of Refund"
+      }
+    },
+    {
+      "id":7,
+      "name":"name1",
+      "description":"Notify Customer that Order is On Time",
+      "type":"UserInteractionTile",
+      "configuration":{
+        "prompt":"Your order is on Time",
+        "options":[]
+      }
+    }
+  ],
+  "connections": [
+    {
+      "source_tile_id": 1,
+      "target_tile_id": 2
+    },
+    {
+      "source_tile_id": 2,
+      "target_tile_id": 3,
+      "condition": "Order Delayed"
+    },
+    {
+      "source_tile_id": 2,
+      "target_tile_id": 5,
+      "condition": "Wrong Items Delivered"
+    },
+    {
+      "source_tile_id": 3,
+      "target_tile_id": 4
+    },
+    {
+      "source_tile_id": 4,
+      "target_tile_id": 5,
+      "condition": "Order On Time"
+    },
+    {
+      "source_tile_id": 5,
+      "target_tile_id": 6,
+      "condition": "Initiate Refund Process"
+    }
+  ]
+}

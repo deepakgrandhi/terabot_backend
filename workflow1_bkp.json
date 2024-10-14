@@ -1,0 +1,135 @@
+{
+  "workflow_name": "Food Delivery Order Issue Resolution",
+  "tiles": [
+    {
+      "id": 1,
+      "type": "User Interaction",
+      "configuration": {
+        "prompt": "What seems to be the issue with your order?",
+        "options": ["Order Delayed", "Wrong Items Delivered"]
+      },
+      "position": {
+        "x": 100,
+        "y": 200
+      }
+    },
+    {
+      "id": 2,
+      "type": "Logic Builder",
+      "configuration": {
+        "condition": "Order Delayed",
+        "action_if_true": "Flow Jump to Check Delivery Status",
+        "action_if_false": "Flow Jump to Wrong Items Resolution"
+      },
+      "position": {
+        "x": 300,
+        "y": 200
+      }
+    },
+    {
+      "id": 3,
+      "type": "Flow Jump",
+      "configuration": {
+        "jump_to": "API Call to Check Order Status",
+        "fallback_action": "Escalate to Support Agent"
+      },
+      "position": {
+        "x": 500,
+        "y": 200
+      }
+    },
+    {
+      "id": 4,
+      "type": "API Call",
+      "configuration": {
+        "api_url": "https://api.example.com/order/status",
+        "method": "GET",
+        "params": {
+          "order_id": "{{order_id}}"
+        },
+        "response_processing": "Check if Order is On Time"
+      },
+      "position": {
+        "x": 700,
+        "y": 200
+      }
+    },
+    {
+      "id": 5,
+      "type": "Logic Builder",
+      "configuration": {
+        "condition": "Order On Time",
+        "action_if_true": "Send Email - Inform Customer",
+        "action_if_false": "Issue Refund"
+      },
+      "position": {
+        "x": 900,
+        "y": 200
+      }
+    },
+    {
+      "id": 6,
+      "type": "API Call",
+      "configuration": {
+        "api_url": "https://api.example.com/order/refund",
+        "method": "POST",
+        "params": {
+          "order_id": "{{order_id}}"
+        },
+        "response_processing": "Notify Customer of Refund"
+      },
+      "position": {
+        "x": 1100,
+        "y": 200
+      }
+    },
+    {
+      "id": 7,
+      "type": "Send Email",
+      "configuration": {
+        "to": "customer@example.com",
+        "subject": "Order Update",
+        "body": "Your order is on its way and should arrive shortly. Thank you for your patience!"
+      },
+      "position": {
+        "x": 1300,
+        "y": 200
+      }
+    }
+  ],
+  "connections": [
+    {
+      "source_tile_id": 1,
+      "target_tile_id": 2
+    },
+    {
+      "source_tile_id": 2,
+      "target_tile_id": 3,
+      "condition": "Order Delayed"
+    },
+    {
+      "source_tile_id": 2,
+      "target_tile_id": 5,
+      "condition": "Wrong Items Delivered"
+    },
+    {
+      "source_tile_id": 3,
+      "target_tile_id": 4
+    },
+    {
+      "source_tile_id": 4,
+      "target_tile_id": 5,
+      "condition": "Order On Time"
+    },
+    {
+      "source_tile_id": 5,
+      "target_tile_id": 6,
+      "condition": "Issue Refund"
+    },
+    {
+      "source_tile_id": 5,
+      "target_tile_id": 7,
+      "condition": "Send Email"
+    }
+  ]
+}
